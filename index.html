@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jogo dos Insetos</title>
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #a8e063, #56ab2f);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.jogo {
+  background: white;
+  width: 100%;
+  max-width: 500px;
+  padding: 30px;
+  border-radius: 25px;
+  text-align: center;
+  box-shadow: 0 8px 25px #0003;
+}
+
+h1 {
+  color: #388e3c;
+}
+
+.emoji {
+  font-size: 100px;
+  margin: 20px;
+}
+
+button {
+  width: 100%;
+  padding: 15px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 12px;
+  background: #e8f5e9;
+  color: #256b2a;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #81c784;
+  transform: scale(1.03);
+}
+
+#resultado {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 15px 0;
+}
+
+#curiosidade {
+  background: #fff8dc;
+  padding: 12px;
+  border-radius: 12px;
+  margin-top: 15px;
+}
+
+.progresso {
+  color: #555;
+  margin: 15px;
+}
+
+#reiniciar {
+  background: #388e3c;
+  color: white;
+  display: none;
+}
+
+
+/* Estilos da segunda fase */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #a8e063, #56ab2f);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.jogo {
+  background: white;
+  width: 100%;
+  max-width: 500px;
+  padding: 25px;
+  border-radius: 25px;
+  text-align: center;
+  box-shadow: 0 8px 25px #0003;
+}
+
+h1 {
+  color: #388e3c;
+}
+
+.insetos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.inseto {
+  background: #e8f5e9;
+  padding: 15px;
+  border-radius: 15px;
+  min-height: 125px;
+}
+
+.emoji {
+  font-size: 45px;
+}
+
+.alimentos {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.alimento {
+  background: #fff8dc;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: bold;
+  cursor: grab;
+  border: 2px solid #fbc02d;
+  touch-action: none;
+  user-select: none;
+}
+
+.alimento:active {
+  cursor: grabbing;
+}
+
+.inseto.destino {
+  border: 3px dashed #81c784;
+}
+
+.inseto.correto {
+  background: #c8e6c9;
+  border: 3px solid green;
+}
+
+#resultado {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 15px;
+}
+
+button {
+  background: #388e3c;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 17px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+}
+
+#final {
+  display: none;
+}
+
+
+#fase1 { max-width: 450px; }
+#fase2 { max-width: 500px; }
+
+#irFase2 { background: #388e3c; color: white; }
+
+</style>
+</head>
+<body>
+
+<div class="jogo" id="fase1">
+
+  <h1>🐞 Adivinhe o Inseto!</h1>
+
+  <p>Você consegue descobrir qual é o inseto?</p>
+
+  <div class="progresso" id="progresso"></div>
+
+  <div class="emoji" id="emoji">🐞</div>
+
+  <div id="opcoes"></div>
+
+  <div id="resultado"></div>
+
+  <div id="curiosidade"></div>
+
+  <button id="proximo" onclick="proximaPergunta()"
+  style="display:none">
+    Próximo inseto ➜
+  </button>
+
+  <h3 id="pontuacao">⭐ Pontos: 0</h3>
+
+  <button id="irFase2" onclick="iniciarFase2()" style="display:none">
+    🌻 Ir para a Fase 2
+  </button>
+
+  <button id="reiniciar" onclick="reiniciarJogo()">
+    🔄 Jogar novamente
+  </button>
+
+</div>
+
+<script>
+
+const insetos = [
+  {
+    emoji: "🐞",
+    resposta: "Joaninha",
+    opcoes: ["Joaninha", "Abelha", "Formiga"],
+    curiosidade: "A joaninha ajuda a proteger plantas comendo pulgões!"
+  },
+  {
+    emoji: "🐝",
+    resposta: "Abelha",
+    opcoes: ["Mosca", "Abelha", "Borboleta"],
+    curiosidade: "As abelhas ajudam na polinização das flores e produzem mel!"
+  },
+  {
+    emoji: "🐜",
+    resposta: "Formiga",
+    opcoes: ["Formiga", "Grilo", "Besouro"],
+    curiosidade: "As formigas conseguem carregar objetos muito mais pesados que elas!"
+  },
+  {
+    emoji: "🦋",
+    resposta: "Borboleta",
+    opcoes: ["Abelha", "Borboleta", "Joaninha"],
+    curiosidade: "As borboletas começam sua vida como lagartas!"
+  },
+  {
+    emoji: "🦗",
+    resposta: "Grilo",
+    opcoes: ["Grilo", "Mosquito", "Formiga"],
+    curiosidade: "Os grilos produzem sons esfregando suas asas!"
+  },
+  {
+    emoji: "🪲",
+    resposta: "Besouro",
+    opcoes: ["Borboleta", "Abelha", "Besouro"],
+    curiosidade: "Existem milhares de espécies diferentes de besouros!"
+  },
+  {
+    emoji: "🦟",
+    resposta: "Mosquito",
+    opcoes: ["Mosquito", "Joaninha", "Grilo"],
+    curiosidade: "Somente as fêmeas de muitas espécies de mosquito sugam sangue!"
+  },
+  {
+    emoji: "🪰",
+    resposta: "Mosca",
+    opcoes: ["Formiga", "Mosca", "Abelha"],
+    curiosidade: "As moscas possuem olhos compostos por muitas pequenas lentes!"
+  },
+  {
+    emoji: "🪳",
+    resposta: "Barata",
+    opcoes: ["Barata", "Besouro", "Grilo"],
+    curiosidade: "As baratas existem há milhões de anos!"
+  },
+  {
+    emoji: "🦗",
+    resposta: "Gafanhoto",
+    opcoes: ["Gafanhoto", "Joaninha", "Abelha"],
+    curiosidade: "Os gafanhotos conseguem saltar grandes distâncias usando suas pernas traseiras!"
+  }
+];
+
+let indice = 0;
+let pontos = 0;
+let respondeu = false;
+
+function mostrarPergunta() {
+
+  respondeu = false;
+
+  const inseto = insetos[indice];
+
+  document.getElementById("emoji").textContent =
+    inseto.emoji;
+
+  document.getElementById("progresso").textContent =
+    `Pergunta ${indice + 1} de ${insetos.length}`;
+
+  document.getElementById("resultado").textContent = "";
+
+  document.getElementById("curiosidade").textContent = "";
+
+  document.getElementById("proximo").style.display = "none";
+
+  document.getElementById("opcoes").innerHTML = "";
+
+  inseto.opcoes.forEach(opcao => {
+
+    const botao = document.createElement("button");
+
+    botao.textContent = opcao;
+
+    botao.onclick = () => verificarResposta(opcao);
+
+    document.getElementById("opcoes").appendChild(botao);
+
+  });
+
+}
+
+function verificarResposta(escolha) {
+
+  if (respondeu) return;
+
+  respondeu = true;
+
+  const inseto = insetos[indice];
+
+  const resultado = document.getElementById("resultado");
+
+  if (escolha === inseto.resposta) {
+
+    pontos++;
+
+    resultado.textContent = "🎉 Parabéns! Você acertou!";
+
+    resultado.style.color = "green";
+
+  } else {
+
+    resultado.textContent =
+      "❌ Ops! A resposta correta é " + inseto.resposta;
+
+    resultado.style.color = "red";
+
+  }
+
+  document.getElementById("curiosidade").textContent =
+    "💡 Curiosidade: " + inseto.curiosidade;
+
+  document.getElementById("pontuacao").textContent =
+    "⭐ Pontos: " + pontos;
+
+  document.getElementById("proximo").style.display = "block";
+
+}
+
+function proximaPergunta() {
+
+  indice++;
+
+  if (indice < insetos.length) {
+
+    mostrarPergunta();
+
+  } else {
+
+    finalizarJogo();
+
+  }
+
+}
+
+function finalizarJogo() {
+
+  document.getElementById("emoji").textContent = "🏆";
+
+  document.getElementById("progresso").textContent =
+    "Fim do jogo!";
+
+  document.getElementById("opcoes").innerHTML = "";
+
+  document.getElementById("resultado").textContent =
+    `Você acertou ${pontos} de ${insetos.length} perguntas!`;
+
+  document.getElementById("curiosidade").textContent =
+    pontos === insetos.length
+    ? "🌟 Perfeito! Você é um especialista em insetos!"
+    : "👏 Muito bem! Continue aprendendo sobre a natureza!";
+
+  document.getElementById("proximo").style.display = "none";
+
+  document.getElementById("irFase2").style.display = "block";
+  document.getElementById("reiniciar").style.display = "block";
+
+}
+
+function reiniciarJogo() {
+
+  indice = 0;
+  pontos = 0;
+
+  document.getElementById("pontuacao").textContent =
+    "⭐ Pontos: 0";
+
+  document.getElementById("reiniciar").style.display = "none";
+  document.getElementById("irFase2").style.display = "none";
+  document.getElementById("fase1").style.display = "block";
+  document.getElementById("fase2").style.display = "none";
+
+  mostrarPergunta();
+
+}
+
+function iniciarFase2() {
+  document.getElementById("fase1").style.display = "none";
+  document.getElementById("fase2").style.display = "block";
+}
+
+mostrarPergunta();
+
+</script>
+
+<div class="jogo" id="fase2" style="display:none">
+
+<h1>🌻 Fase 2: Alimente os Insetos!</h1>
+
+<p>Arraste cada alimento até o inseto que gosta dele!</p>
+
+<p id="progressoFase2">Acertos: 0 de 4</p>
+
+<div class="insetos">
+
+  <div class="inseto destino" data-resposta="folha">
+    <div class="emoji">🐛</div>
+    <strong>Lagarta</strong>
+    <p>Solte aqui!</p>
+  </div>
+
+  <div class="inseto destino" data-resposta="nectar">
+    <div class="emoji">🦋</div>
+    <strong>Borboleta</strong>
+    <p>Solte aqui!</p>
+  </div>
+
+  <div class="inseto destino" data-resposta="mel">
+    <div class="emoji">🐝</div>
+    <strong>Abelha</strong>
+    <p>Solte aqui!</p>
+  </div>
+
+  <div class="inseto destino" data-resposta="pulgao">
+    <div class="emoji">🐞</div>
+    <strong>Joaninha</strong>
+    <p>Solte aqui!</p>
+  </div>
+
+</div>
+
+<h3>🍎 Escolha os alimentos:</h3>
+
+<div class="alimentos" id="alimentos">
+
+  <div class="alimento" draggable="true"
+  data-alimento="mel">🍯 Mel</div>
+
+  <div class="alimento" draggable="true"
+  data-alimento="folha">🍃 Folha</div>
+
+  <div class="alimento" draggable="true"
+  data-alimento="pulgao">🐜 Pulgão</div>
+
+  <div class="alimento" draggable="true"
+  data-alimento="nectar">🌸 Néctar</div>
+
+</div>
+
+<div id="resultadoFase2">
+  Vamos começar! 🎮
+</div>
+
+<div id="final">
+  <h2>🏆 Parabéns!</h2>
+  <p>Você completou a segunda fase!</p>
+  <button onclick="reiniciar()">🔄 Jogar novamente</button>
+</div>
+
+</div>
+
+<script>
+
+let pontosFase2 = 0;
+
+const insetosFase2 = document.querySelectorAll("#fase2 .inseto");
+const alimentosFase2 = document.querySelectorAll("#fase2 .alimento");
+
+let arrastado = null;
+
+// Arrastar com mouse
+alimentosFase2.forEach(alimento => {
+
+  alimento.addEventListener("dragstart", () => {
+    arrastado = alimento;
+  });
+
+});
+
+insetosFase2.forEach(inseto => {
+
+  inseto.addEventListener("dragover", evento => {
+    evento.preventDefault();
+  });
+
+  inseto.addEventListener("drop", evento => {
+    evento.preventDefault();
+
+    if (arrastado) {
+      verificar(inseto, arrastado);
+    }
+  });
+
+});
+
+// Interação por toque e mouse
+alimentosFase2.forEach(alimento => {
+
+  alimento.addEventListener("pointerdown", evento => {
+
+    evento.preventDefault();
+
+    arrastado = alimento;
+    alimento.setPointerCapture(evento.pointerId);
+
+  });
+
+  alimento.addEventListener("pointerup", evento => {
+
+    if (!arrastado) return;
+
+    const destino = document.elementFromPoint(
+      evento.clientX,
+      evento.clientY
+    );
+
+    const inseto = destino?.closest(".inseto");
+
+    if (inseto) {
+      verificar(inseto, arrastado);
+    }
+
+    arrastado = null;
+
+  });
+
+});
+
+function verificar(inseto, alimento) {
+
+  if (inseto.classList.contains("correto")) return;
+
+  if (
+    inseto.dataset.resposta ===
+    alimento.dataset.alimento
+  ) {
+
+    pontosFase2++;
+
+    inseto.classList.add("correto");
+
+    inseto.querySelector("p").textContent =
+      "🎉 Alimentado!";
+
+    alimento.style.visibility = "hidden";
+
+    document.getElementById("resultadoFase2").textContent =
+      "Muito bem! Você acertou! 🌟";
+
+    document.getElementById("progressoFase2").textContent =
+      `Acertos: ${pontosFase2} de 4`;
+
+    if (pontosFase2 === 4) {
+      document.getElementById("final").style.display =
+        "block";
+
+      document.getElementById("resultadoFase2").textContent =
+        "🎊 Você conseguiu alimentar todos os insetos!";
+    }
+
+  } else {
+
+    document.getElementById("resultadoFase2").textContent =
+      "Ops! Esse não é o alimento correto. Tente novamente! 💚";
+
+  }
+
+}
+
+function reiniciar() {
+
+  pontosFase2 = 0;
+
+  document.getElementById("final").style.display =
+    "none";
+
+  document.getElementById("progressoFase2").textContent =
+    "Acertos: 0 de 4";
+
+  document.getElementById("resultadoFase2").textContent =
+    "Vamos começar! 🎮";
+
+  insetosFase2.forEach(inseto => {
+
+    inseto.classList.remove("correto");
+
+    inseto.querySelector("p").textContent =
+      "Solte aqui!";
+
+  });
+
+  alimentosFase2.forEach(alimento => {
+    alimento.style.visibility = "visible";
+  });
+
+}
+
+</script>
+
+</body>
+</html>
